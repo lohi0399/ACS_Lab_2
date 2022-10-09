@@ -212,3 +212,20 @@ std::shared_ptr<Image> runWaterEffectCUDA(const Image *src, const WaterEffectOpt
   return nullptr;
   /* REPLACE THIS CODE WITH YOUR OWN WATER EFFECT PIPELINE */
 }
+
+std::shared_ptr<Image> runBlurStageCUDA(const Image *previous, const WaterEffectOptions *options) {
+  // Create a Gaussian convolution kernel
+  Kernel gaussian = Kernel::gaussian(options->blur_size, options->blur_size, 1.0);
+
+  // Create a new image to store the result
+  auto img_blurred = std::make_shared<Image>(previous->width, previous->height);
+
+  // Blur every channel using the gaussian kernel
+  performCudaConvolute(previous, img_blurred.get(), &gaussian);
+
+  // Save the resulting image
+  if (options->save_intermediate)
+    img_blurred->toPNG("output/" + options->img_name + "_blurred_cuda.png");
+
+  return img_blurred;
+}
