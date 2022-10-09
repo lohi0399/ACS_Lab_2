@@ -1,0 +1,2 @@
+#define NUM_PRELINKED_OBJECTS 1
+DEFINE_REGISTER_FUNC(_67948e94_22_cuda_device_runtime_cu_8b1a5d37)
