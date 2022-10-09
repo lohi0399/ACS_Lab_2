@@ -21,6 +21,54 @@
 #include "imgproc_cuda.hpp"
 #include "imgproc_cuda.cu"
 
+void performCudaConvolute(const Image *src, Image *dest, const Kernel *kernel) {
+    // Check arguments
+    assert((src != nullptr) && (dest != nullptr) && (kernel != nullptr));
+    checkDimensionsEqualOrThrowErr(src, dest);
+
+    unsigned char *src_img, *dest_img;
+    float *kernel_weights;
+
+    size_t source_img_size = src->height * src->width * 4 * sizeof(unsigned char);
+    size_t kernel_size = kernel->height * kernel->width * sizeof(int);
+    cudaMalloc(&src_img, source_img_size);
+    cudaMalloc(&dest_img, source_img_size);
+    cudaMalloc(&kernel_weights, kernel_size);
+
+//   int err = cudaPeekAtLastError();
+//   if (err)
+//       std::cout << "ERROR at malloc:" << err << std::endl;
+
+    size_t destination_img_size = dest->height * dest->width * 4 * sizeof(unsigned char);
+    cudaMemcpy(dest_img, dest->raw.data(), destination_img_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(src_img, src->raw.data(), source_img_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(kernel_weights, kernel->weights.data(), kernel->height * kernel->width * sizeof(int),
+               cudaMemcpyHostToDevice);
+
+//   err = cudaPeekAtLastError();
+//   if (err)
+//       std::cout << "ERROR at memset and memcopy:" << err << std::endl;
+// auto does not work here
+    dim3 numthreads(32, 32, 1);
+    dim3 numblocks((src->width / numthreads.x) + 1, (src->height / numthreads.y) + 1, 4);
+
+    convolutionKernel <<<numblocks, numthreads>>>(src->height, src->width,
+                                                  kernel->height, kernel->width,
+                                                  kernel->scale, kernel_weights,
+                                                  kernel->xoff, kernel->yoff,
+                                                  src_img, dest_img);
+
+    cudaDeviceSynchronize();
+//  int err = cudaPeekAtLastError();
+//       std::cout << "ERROR at copying values from device" << err << std::endl;
+
+    cudaFree(src_img);
+    cudaFree(dest_img);
+    cudaFree(kernel_weights);
+}
+
+
+
 std::shared_ptr<Image> runRippleStage(const Image *previous, const WaterEffectOptions *options, Timer ts) {
   // Create a new image to store the result
   auto img_rippled = std::make_shared<Image>(previous->width, previous->height);
