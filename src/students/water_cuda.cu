@@ -19,6 +19,7 @@
 #include "../utils/Histogram.hpp"
 #include "water_cuda.hpp"
 #include "imgproc_cuda.hpp"
+#include "imgproc_cuda.cu"
 
 std::shared_ptr<Image> runRippleStage(const Image *previous, const WaterEffectOptions *options, Timer ts) {
   // Create a new image to store the result
