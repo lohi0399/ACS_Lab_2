@@ -222,6 +222,24 @@ std::shared_ptr<Histogram> runHistogramStage(const Image *previous, const WaterE
   return hist_res;
 }
 
+std::shared_ptr<Image> runBlurStageCUDA(const Image *previous, const WaterEffectOptions *options) {
+  // Create a Gaussian convolution kernel
+  Kernel gaussian = Kernel::gaussian(options->blur_size, options->blur_size, 1.0);
+
+  // Create a new image to store the result
+  auto img_blurred = std::make_shared<Image>(previous->width, previous->height);
+
+  // Blur every channel using the gaussian kernel
+  performCudaConvolute(previous, img_blurred.get(), &gaussian);
+
+  // Save the resulting image
+  if (options->save_intermediate)
+    img_blurred->toPNG("output/" + options->img_name + "_blurred_cuda.png");
+
+  return img_blurred;
+}
+
+
 std::shared_ptr<Image> runWaterEffectCUDA(const Image *src, const WaterEffectOptions *options) {
   /* REPLACE THIS CODE WITH YOUR OWN WATER EFFECT PIPELINE */
   Timer ts;
@@ -258,23 +276,20 @@ std::shared_ptr<Image> runWaterEffectCUDA(const Image *src, const WaterEffectOpt
     ts.stop();
     std::cout << "Stage: Ripple effect CUDA:    " << ts.seconds() << " s." << std::endl;
   }
+
+  // Gaussian blur stage
+  if (options->blur) {
+    ts.start();
+    if (img_result == nullptr) {
+      img_result = runBlurStageCUDA(src, options);
+    } else {
+      img_result = runBlurStageCUDA(img_result.get(), options);
+    }
+    ts.stop();
+    std::cout << "Stage: Blur:             " << ts.seconds() << " s." << std::endl;
+  }
+
   return nullptr;
   /* REPLACE THIS CODE WITH YOUR OWN WATER EFFECT PIPELINE */
 }
 
-std::shared_ptr<Image> runBlurStageCUDA(const Image *previous, const WaterEffectOptions *options) {
-  // Create a Gaussian convolution kernel
-  Kernel gaussian = Kernel::gaussian(options->blur_size, options->blur_size, 1.0);
-
-  // Create a new image to store the result
-  auto img_blurred = std::make_shared<Image>(previous->width, previous->height);
-
-  // Blur every channel using the gaussian kernel
-  performCudaConvolute(previous, img_blurred.get(), &gaussian);
-
-  // Save the resulting image
-  if (options->save_intermediate)
-    img_blurred->toPNG("output/" + options->img_name + "_blurred_cuda.png");
-
-  return img_blurred;
-}
