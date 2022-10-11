@@ -114,7 +114,7 @@ __global__ void applyRippleCuda(unsigned char *src, unsigned char *dest, float f
     }
 }
 
-__global__ void convolutionKernel(unsigned int height, unsigned int width,
+__global__ void convolutionKernelCuda(unsigned int height, unsigned int width,
                        int kernel_height, int kernel_width,
                        float kernel_scale, float *kernel_weights,
                        int kernel_xoff, int kernel_yoff,

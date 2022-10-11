@@ -61,7 +61,7 @@ void performCudaConvolute(const Image *src, Image *dest, const Kernel *kernel) {
     dim3 numthreads(32, 32, 1);
     dim3 numblocks((src->width / numthreads.x) + 1, (src->height / numthreads.y) + 1, 4);
 
-    convolutionKernel <<<numblocks, numthreads>>>(src->height, src->width,
+    convolutionKernelCuda <<<numblocks, numthreads>>>(src->height, src->width,
                                                   kernel->height, kernel->width,
                                                   kernel->scale, kernel_weights,
                                                   kernel->xoff, kernel->yoff,
