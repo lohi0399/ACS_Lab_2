@@ -21,6 +21,15 @@
 #include "imgproc_cuda.hpp"
 #include "imgproc_cuda.cu"
 
+
+static inline void checkDimensionsEqualOrThrowErr(const Image *a, const Image *b) {
+    assert(a != nullptr);
+    assert(b != nullptr);
+    if ((a->width != b->width) || (a->height != b->height)) {
+        throw std::domain_error("Source and destination image are not of equal dimensions.");
+    }
+}
+
 void performCudaConvolute(const Image *src, Image *dest, const Kernel *kernel) {
     // Check arguments
     assert((src != nullptr) && (dest != nullptr) && (kernel != nullptr));

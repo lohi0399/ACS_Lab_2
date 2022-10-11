@@ -14,13 +14,7 @@
 
 #include "imgproc_cuda.hpp"
 
-static inline void checkDimensionsEqualOrThrowErr(const Image *a, const Image *b) {
-    assert(a != nullptr);
-    assert(b != nullptr);
-    if ((a->width != b->width) || (a->height != b->height)) {
-        throw std::domain_error("Source and destination image are not of equal dimensions.");
-    }
-}
+
 
 __global__ void getHistogramCuda(const unsigned char *src, int numPixels, int *hist)
 {

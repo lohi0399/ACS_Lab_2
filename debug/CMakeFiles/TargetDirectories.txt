@@ -1,3 +1,0 @@
-/home/nfs/ygopinath/lab2_lohi/ACS_Lab_2/debug/CMakeFiles/rebuild_cache.dir
-/home/nfs/ygopinath/lab2_lohi/ACS_Lab_2/debug/CMakeFiles/edit_cache.dir
-/home/nfs/ygopinath/lab2_lohi/ACS_Lab_2/debug/CMakeFiles/imgproc-benchmark.dir
